@@ -14,10 +14,9 @@ const char *mqtt_server = "mqtt.cloud.yandex.net";  //сервер кому ес
 const int mqtt_port = 8883;
 
 /* change it with your ssid-password */
-const char *ssid = "Alevtina";
-const char *password = "A6003557";
-//const char *ssid = "AndroidAP069D";
-//const char *password = "ikmu9538";
+const char *ssid = "A******a";
+const char *password = "A*****7";
+
 /* this is the IP of PC/raspberry where you installed MQTT Server
 on Wins use "ipconfig"
 on Linux use "ifconfig" to get its IP address */
@@ -28,8 +27,6 @@ WiFiClientSecure net_client_pub;  //wifisecure для подключения к 
 WiFiClientSecure net_client_sub;  //в обратную сторону
 PubSubClient mqtt_client_pub;     //подключается клиент mqtt для публикации уже на яндексе посде подключения
 PubSubClient mqtt_client_sub;     //в обратную сторону
-//WiFiClient espClient; //An object of WiFiClientSecure is created called ‘espClient.’
-//PubSubClient client(espClient);
 
 #define TXD_PIN (GPIO_NUM_17)
 #define RXD_PIN (GPIO_NUM_16)
@@ -91,6 +88,7 @@ void receivedCallback(char *topic, byte *payload, unsigned int length)  // topic
     Serial.println(((char *)output_from_esp)[1]);
   }
 
+// Разкомментить если необходимо провести тестирование
   //Serial2.write(0xAB);
   //uint8_t test = 5;
   //Serial2.write(&test, 1);
@@ -204,17 +202,13 @@ void setup() {
   mqtt_client_sub.setServer(mqtt_server, mqtt_port);
   mqtt_client_sub.setKeepAlive (70);
   mqtt_client_sub.setCallback(receivedCallback);
-  // mqtt_client_sub.setCallback(callbackMqtt); //не помню откуда взяла и что это
-
+  
   //подключение
   wifi_connect();
   delay(500);
   mqtt_connect_pub();
   mqtt_connect_sub();
   
-
-  //  mqtt_client_sub.subscribe(lamp);
-  //  mqtt_client_pub.publish(lamp, "off");
 }
 
 void loop() {
@@ -257,7 +251,7 @@ void loop() {
   //это та часть котрая отображает статус светика
   static uint16_t prev_led = 0xFF; // static сохраняет переменные между вызовами функции loop
   static char  led[4] = {0};
-  //если предидущее показанее не совпадает с текущим, то в предидущее записываем текущее и публикуем
+  //если предыдущее показанее не совпадает с текущим, то в предидущее записываем текущее и публикуем
 
   if (prev_led != input_from_stm[3]) //сравниваем начальную переменную и то что пришло с стм32, если не равны проваливаемся в код
   {
@@ -272,7 +266,7 @@ void loop() {
   }
   prev_led = input_from_stm[3]; // помещаем полученное значение в переменную (котрая статик и не изменит свое содержание при вновь вызванной функции)
 // и заново возвращаемся к if (prev_led != input_from_stm[3])  - теперь если не поступило нового сообщения, то перемнные равны
-//и в тело функции мы не провалимся и вновь публиковать значение не будет
+//и в тело функции мы не провалимся и вновь публиковать значение не будем
 
 
   if (millis() - lastPublishTime > 70000) {
@@ -298,15 +292,7 @@ void loop() {
     Serial.println(input_from_stm[2]);
     mqtt_client_pub.publish(LED_TOPIC_BRIGHT, b, strlen(b));
 
-    //ниже данные опроса состояния транзистора подключенного к стм32. если 1, значит свет включен, если 0 - выключен
-    //char d[20];
-    //sprintf(d, "%d", input_from_stm[3]);
-    //Serial.print("rez=");
-    //Serial.println(input_from_stm[3]);
-
-    //  mqtt_client_pub.publish(LED_TOPIC, d, strlen(d));//????????? тоже самое. сами писал не убирать из под миллс, иначе один раз будет публиковать и все
-
-
+    
     char f[20];
     sprintf(f, " %0.0f", ((bmp.readPressure()) * 0.00750062));
     mqtt_client_pub.publish(TOPIC_GMP180_P, f);
